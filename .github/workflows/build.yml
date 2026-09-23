@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -34,9 +35,11 @@ jobs:
 
           cat > app/build.gradle <<'EOF'
           plugins { id 'com.android.application' }
+
           android {
               namespace 'com.eileen.launcher'
               compileSdk 35
+
               defaultConfig {
                   applicationId "com.eileen.launcher"
                   minSdk 26
@@ -52,13 +55,16 @@ jobs:
               <application
                   android:theme="@style/AppTheme"
                   android:label="艾琳">
+
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
+
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN"/>
                           <category android:name="android.intent.category.LAUNCHER"/>
                       </intent-filter>
+
                   </activity>
               </application>
           </manifest>
@@ -84,23 +90,30 @@ jobs:
           import android.widget.Toast;
 
           public class MainActivity extends Activity {
+
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
+
                   try {
-                      Intent i = new Intent(
+                      Intent intent = new Intent(
                           Intent.ACTION_VIEW,
                           Uri.parse("https://chat.com/?mode=voice")
                       );
-                      i.setPackage("com.openai.chatgpt");
-                      startActivity(i);
+
+                      intent.setPackage("com.openai.chatgpt");
+
+                      startActivity(intent);
+
                   } catch (ActivityNotFoundException e) {
+
                       Toast.makeText(
                           this,
                           "无法启动 ChatGPT Voice",
                           Toast.LENGTH_LONG
                       ).show();
                   }
+
                   finish();
               }
           }
@@ -110,4 +123,11 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      -
+      - name: Build APK
+        run: gradle :app:assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: EileenLauncher-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
